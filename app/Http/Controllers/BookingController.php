@@ -7,11 +7,30 @@ use App\Models\Booking;
 
 class BookingController extends Controller
 {
-    public function index()
-    {
-        $bookings = Booking::all(); // basic CRUD, no pagination yet
-        return view('bookings.index', compact('bookings'));
+   public function index(Request $request)
+{
+    $query = \App\Models\Booking::query();
+
+    //  Search by name or email
+    if ($request->filled('search')) {
+        $query->where(function($q) use ($request) {
+            $q->where('customer_name', 'like', '%' . $request->search . '%')
+              ->orWhere('email', 'like', '%' . $request->search . '%');
+        });
     }
+
+    //  Filter by status
+    if ($request->filled('status')) {
+        $query->where('status', $request->status);
+    }
+
+    $bookings = $query->latest()->get();
+
+    return view('bookings.index', compact('bookings'));
+}
+
+
+
 
     public function create()
     {

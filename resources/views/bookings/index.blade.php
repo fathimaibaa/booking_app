@@ -1,9 +1,43 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="mb-3">
-    <a href="{{ route('bookings.create') }}" class="btn btn-primary">Add Booking</a>
+<div class="row mb-3 align-items-center">
+    <div class="col-md-4 mb-2 mb-md-0">
+        <h2>All Bookings</h2>
+    </div>
+
+    <div class="col-md-5 mb-2 mb-md-0">
+        {{-- Search form --}}
+        <form method="GET" action="{{ route('bookings.index') }}" class="row g-2 align-items-end">
+    <div class="col-md-4">
+        <input type="text" name="search" class="form-control" placeholder="Search by name, email, or service" value="{{ request('search') }}">
+    </div>
+    <div class="col-md-3">
+        <select name="status" class="form-select">
+            <option value="">All Status</option>
+            <option value="Confirmed" {{ request('status') == 'Confirmed' ? 'selected' : '' }}>Confirmed</option>
+            <option value="Pending" {{ request('status') == 'Pending' ? 'selected' : '' }}>Pending</option>
+            <option value="Cancelled" {{ request('status') == 'Cancelled' ? 'selected' : '' }}>Cancelled</option>
+        </select>
+    </div>
+    <div class="col-md-2">
+        <input type="date" name="from_date" class="form-control" value="{{ request('from_date') }}">
+    </div>
+    <div class="col-md-2">
+        <input type="date" name="to_date" class="form-control" value="{{ request('to_date') }}">
+    </div>
+    <div class="col-md-1 d-grid">
+        <button type="submit" class="btn btn-primary">Filter</button>
+    </div>
+</form>
+
+    </div>
+
+    <div class="col-md-3 text-md-end">
+        <a href="{{ route('bookings.create') }}" class="btn btn-primary">Add Booking</a>
+    </div>
 </div>
+
 
 <table class="table table-hover align-middle text-center">
     <thead class="table-dark">
@@ -26,19 +60,22 @@
             <td>{{ $booking->booking_date }}</td>
             <td>{{ $booking->service_type }}</td>
             <td>
-                <span class="badge bg-success">{{ $booking->status }}</span>
-            </td>
-            <td>
-                <a href="{{ route('bookings.edit', $booking->id) }}" class="btn btn-sm btn-outline-warning">Edit</a>
-                <button type="button" class="btn btn-sm btn-outline-danger" onclick="showConfirm({{ $booking->id }}, '{{ $booking->customer_name }}')">
-                    Delete
-                </button>
-
-                <form id="delete-form-{{ $booking->id }}" action="{{ route('bookings.destroy', $booking->id) }}" method="POST" class="d-none">
-                    @csrf
-                    @method('DELETE')
-                </form>
-            </td>
+                        <span class="badge 
+                            @if($booking->status == 'Confirmed') bg-success
+                            @elseif($booking->status == 'Pending') bg-warning text-dark
+                            @else bg-danger
+                            @endif">
+                            {{ $booking->status }}
+                        </span>
+                    </td>
+                    <td>
+                        <a href="{{ route('bookings.edit', $booking->id) }}" class="btn btn-sm btn-primary me-1">Edit</a>
+                        <form action="{{ route('bookings.destroy', $booking->id) }}" method="POST" class="d-inline delete-form" data-name="{{ $booking->customer_name }}">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                        </form>
+                    </td>
         </tr>
         @endforeach
     </tbody>
