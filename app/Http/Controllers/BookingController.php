@@ -19,19 +19,20 @@ class BookingController extends Controller
     }
 
     public function store(Request $request)
-    {
-        $request->validate([
-            'customer_name' => 'required|string',
-            'email' => 'required|email',
-            'booking_date' => 'required|date',
-            'service_type' => 'required|string',
-            'status' => 'required|string',
-        ]);
+{
+    $request->validate([
+        'customer_name' => 'required|string',
+        'email' => 'required|email|unique:bookings,email',
+        'booking_date' => 'required|date|before_or_equal:today',
+        'service_type' => 'required|string',
+        'status' => 'required|string',
+    ]);
 
-        Booking::create($request->all());
+    Booking::create($request->all());
 
-        return redirect()->route('bookings.index')->with('success', 'Booking created successfully!');
-    }
+    return redirect()->route('bookings.index')->with('success', 'Booking created successfully!');
+}
+
 
     public function edit(Booking $booking)
     {
@@ -39,19 +40,20 @@ class BookingController extends Controller
     }
 
     public function update(Request $request, Booking $booking)
-    {
-        $request->validate([
-            'customer_name' => 'required|string',
-            'email' => 'required|email',
-            'booking_date' => 'required|date',
-            'service_type' => 'required|string',
-            'status' => 'required|string',
-        ]);
+{
+    $request->validate([
+        'customer_name' => 'required|string',
+        'email' => 'required|email|unique:bookings,email,' . $booking->id,
+        'booking_date' => 'required|date|before_or_equal:today',
+        'service_type' => 'required|string',
+        'status' => 'required|string',
+    ]);
 
-        $booking->update($request->all());
+    $booking->update($request->all());
 
-        return redirect()->route('bookings.index')->with('success', 'Booking updated successfully!');
-    }
+    return redirect()->route('bookings.index')->with('success', 'Booking updated successfully!');
+}
+
 
     public function destroy(Booking $booking)
     {
