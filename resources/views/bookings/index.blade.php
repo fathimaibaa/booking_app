@@ -81,6 +81,13 @@
     </tbody>
 </table>
 
+<!-- pagination -->
+<div class="d-flex justify-content-center mt-3">
+    {{ $bookings->withQueryString()->links('pagination::bootstrap-5') }}
+</div>
+
+
+
 <!-- Custom Confirmation Popup -->
 <div id="confirmBox" class="custom-confirm d-none">
     <div class="confirm-content">

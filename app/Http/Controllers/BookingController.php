@@ -7,27 +7,31 @@ use App\Models\Booking;
 
 class BookingController extends Controller
 {
-   public function index(Request $request)
+  public function index(Request $request)
 {
-    $query = \App\Models\Booking::query();
+    $query = Booking::query();
 
-    //  Search by name or email
+    // Search filter
     if ($request->filled('search')) {
-        $query->where(function($q) use ($request) {
-            $q->where('customer_name', 'like', '%' . $request->search . '%')
-              ->orWhere('email', 'like', '%' . $request->search . '%');
+        $search = $request->search;
+        $query->where(function($q) use ($search) {
+            $q->where('customer_name', 'like', "%{$search}%")
+              ->orWhere('email', 'like', "%{$search}%")
+              ->orWhere('service_type', 'like', "%{$search}%");
         });
     }
 
-    //  Filter by status
+    // Status filter
     if ($request->filled('status')) {
         $query->where('status', $request->status);
     }
 
-    $bookings = $query->latest()->get();
+    // Pagination (5 per page)
+    $bookings = $query->orderBy('booking_date', 'desc')->paginate(5);
 
     return view('bookings.index', compact('bookings'));
 }
+
 
 
 
