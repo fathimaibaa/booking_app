@@ -46,17 +46,22 @@ class BookingController extends Controller
 
     public function store(Request $request)
 {
-    $request->validate([
+    $validated = $request->validate([
         'customer_name' => 'required|string|max:255',
         'email' => 'required|email|unique:bookings,email',
         'booking_date' => 'required|date|before_or_equal:today',
         'service_type' => 'required|string',
+        'status' => 'required|string',
     ]);
 
-    $booking = Booking::create($request->all());
+    $booking = Booking::create($validated);
 
     // send email confirmation
     Mail::to($booking->email)->send(new BookingConfirmation($booking));
+
+    if($request->expectsJson()){
+        return response()->json(['success' => true, 'booking' => $booking]);
+    }
 
     return redirect()->route('bookings.index')->with('success', 'Booking created and confirmation email sent!');
 }
@@ -83,9 +88,16 @@ class BookingController extends Controller
 }
 
 
-    public function destroy(Booking $booking)
-    {
-        $booking->delete();
-        return redirect()->route('bookings.index')->with('success', 'Booking deleted successfully!');
+   public function destroy(Request $request, Booking $booking)
+{
+    $booking->delete();
+
+    // If AJAX request, return JSON
+    if($request->expectsJson()){
+        return response()->json(['success' => true]);
     }
+
+    return redirect()->route('bookings.index')->with('success', 'Booking deleted successfully!');
+}
+
 }
