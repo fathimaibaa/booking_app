@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Booking;
 
+use App\Mail\BookingConfirmation;
+use Illuminate\Support\Facades\Mail;
+
 class BookingController extends Controller
 {
   public function index(Request $request)
@@ -44,16 +47,18 @@ class BookingController extends Controller
     public function store(Request $request)
 {
     $request->validate([
-        'customer_name' => 'required|string',
+        'customer_name' => 'required|string|max:255',
         'email' => 'required|email|unique:bookings,email',
         'booking_date' => 'required|date|before_or_equal:today',
         'service_type' => 'required|string',
-        'status' => 'required|string',
     ]);
 
-    Booking::create($request->all());
+    $booking = Booking::create($request->all());
 
-    return redirect()->route('bookings.index')->with('success', 'Booking created successfully!');
+    // send email confirmation
+    Mail::to($booking->email)->send(new BookingConfirmation($booking));
+
+    return redirect()->route('bookings.index')->with('success', 'Booking created and confirmation email sent!');
 }
 
 
